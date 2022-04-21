@@ -220,6 +220,7 @@ def generate_results_dict(all_dataloaders_dict, model, test_targets, laplace=Fal
     res_dict = {}
 
     for name, dls in all_dataloaders_dict.items():
+        print(f"Working on {name}")
         res_dict[name] = defaultdict(list)
         for dl in dls:
             probs = predict(dl, model, laplace)
@@ -271,24 +272,24 @@ if __name__ == "__main__":
 
     corruptions = [
         "brightness",
-        # "contrast",
-        # "defocus_blur",
-        # "elastic_transform",
-        # "fog",
-        # "frost",
-        # "gaussian_blur",
-        # "gaussian_noise",
-        # "impulse_noise",
-        # "jpeg_compression",
-        # "motion_blur",
-        # "pixelate",
-        # "saturate",
-        # "shot_noise",
-        # "snow",
-        # "spatter",
-        # "speckle_noise",
-        # "zoom_blur",
-        # "glass_blur",
+        "contrast",
+        "defocus_blur",
+        "elastic_transform",
+        "fog",
+        "frost",
+        "gaussian_blur",
+        "gaussian_noise",
+        "impulse_noise",
+        "jpeg_compression",
+        "motion_blur",
+        "pixelate",
+        "saturate",
+        "shot_noise",
+        "snow",
+        "spatter",
+        "speckle_noise",
+        "zoom_blur",
+        "glass_blur",
     ]
     corrupted_dataloaders_dict = {}
 
@@ -301,7 +302,7 @@ if __name__ == "__main__":
 
         dataset = DatafeedImage(np_x, np_y, transform)
         dls = []
-        for i in [1]:
+        for i in [1, 2, 3, 4, 5]:
             dataset = torch.utils.data.Subset(
                 dataset, np.arange(10000 * (i - 1), 10000 * i)
             )
@@ -352,9 +353,8 @@ if __name__ == "__main__":
             model, "classification", layer_indices, backend=AsdlGGN
         )
 
-        with torch.cuda():
-            la_sublayer.fit(train_loader)
-            la_sublayer.optimize_prior_precision(method="marglik")
+        la_sublayer.fit(train_loader)
+        la_sublayer.optimize_prior_precision(method="marglik")
 
         all_res_dict["log_marginal_likelihood"] = la_sublayer.log_marginal_likelihood()
         all_res_dict["prior_precision"] = la_sublayer.prior_precision
