@@ -41,6 +41,7 @@ class AsdlInterface(CurvatureInterface):
 
             f = batch_gradient(self.model, loss_fn, x, None).detach()
             Jk = _get_batch_grad(self.model)
+
             if self.subnetwork_indices is not None:
                 Jk = Jk[:, self.subnetwork_indices]
             Js.append(Jk)
@@ -120,17 +121,26 @@ class AsdlInterface(CurvatureInterface):
         return self.factor * loss, self.factor * diag_ggn
 
     def kron(self, X, y, N, **wkwargs):
+
+        # for i, param in enumerate(self._model.parameters()):
+        #     print(f"{i} : {param.requires_grad}")
+
         with torch.no_grad():
             if self.last_layer:
                 f, X = self.model.forward_with_features(X)
             else:
                 f = self.model(X)
             loss = self.lossfunc(f, y)
+
+        # for i, param in enumerate(self._model.parameters()):
+        #     print(f"{i} : {param.requires_grad}")
+
         curv = fisher_for_cross_entropy(self._model, self._ggn_type, SHAPE_KRON,
                                         inputs=X, targets=y)
         M = len(y)
         kron = self._get_kron_factors(curv, M)
         kron = self._rescale_kron_factors(kron, N)
+
         return self.factor * loss, self.factor * kron
 
 
