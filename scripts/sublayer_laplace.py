@@ -303,11 +303,11 @@ if __name__ == "__main__":
         dataset = DatafeedImage(np_x, np_y, transform)
         dls = []
         for i in [1, 2, 3, 4, 5]:
-            dataset = torch.utils.data.Subset(
+            subset_dataset = torch.utils.data.Subset(
                 dataset, np.arange(10000 * (i - 1), 10000 * i)
             )
             dl = torch.utils.data.DataLoader(
-                dataset, batch_size=batch_size, shuffle=False, num_workers=4
+                subset_dataset, batch_size=batch_size, shuffle=False, num_workers=4
             )
             dls.append(dl)
 
