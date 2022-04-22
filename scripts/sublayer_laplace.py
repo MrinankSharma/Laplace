@@ -319,7 +319,7 @@ if __name__ == "__main__":
     # load model
     model = FixupWideResNet(16, 4, 10, dropRate=0.3).cuda()
     model.load_state_dict(
-        torch.load(f"/home/magd5198/Laplace/notebooks/checkpoints/seed{args.seed}.pt")[
+        torch.load(f"/home/magd5198/Laplace/notebooks/checkpoints/seed{args.seed}.pt", map_location="cuda:0")[
             "model_state_dict"
         ]
     )
