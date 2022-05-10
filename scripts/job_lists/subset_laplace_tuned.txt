@@ -1,0 +1,6 @@
+scripts/sublayer_laplace_val.py --seed 1 --stochastic_groups_str 11111111
+scripts/sublayer_laplace_val.py --seed 2 --stochastic_groups_str 11111111
+scripts/sublayer_laplace_val.py --seed 3 --stochastic_groups_str 11111111
+scripts/sublayer_laplace_val.py --seed 1 --stochastic_groups_str 10000001
+scripts/sublayer_laplace_val.py --seed 2 --stochastic_groups_str 10000001
+scripts/sublayer_laplace_val.py --seed 3 --stochastic_groups_str 10000001

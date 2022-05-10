@@ -7,7 +7,7 @@
 # Inspired by https://github.com/y0ast/slurm-for-ml/blob/master/generic.sh
 
 #SBATCH --cpus-per-task=4
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:1 --constraint='gpu_mem:48GB'
 #SBATCH --partition=short
 #SBATCH --time=11:59:59
 

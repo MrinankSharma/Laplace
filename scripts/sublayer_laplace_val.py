@@ -24,7 +24,6 @@ import argparse
 parser = argparse.ArgumentParser(description="Process some integers.")
 parser.add_argument("--seed", type=int)
 parser.add_argument("--stochastic_groups_str", type=str)
-parser.add_argument("--prior_precision", type=float)
 
 ##########################################################################################
 # Wide ResNet (for WRN16-4)
@@ -256,9 +255,22 @@ if __name__ == "__main__":
         download=True,
         transform=transform,
     )
-    train_loader = torch.utils.data.DataLoader(
+    full_train_loader = torch.utils.data.DataLoader(
         trainset, batch_size=batch_size, shuffle=False, num_workers=4
     )
+
+    small_train_set, val_set = torch.utils.data.random_split(
+        trainset, [45000, 5000], generator=torch.Generator().manual_seed(42)
+    )
+    small_train_loader = torch.utils.data.DataLoader(
+        small_train_set, batch_size=batch_size, shuffle=False, num_workers=4
+    )
+
+    val_loader = torch.utils.data.DataLoader(
+        val_set, batch_size=batch_size, shuffle=False, num_workers=4
+    )
+
+    val_targets = torch.cat([y for x, y in val_loader], dim=0).numpy()
 
     testset = torchvision.datasets.CIFAR10(
         root="/data/stat-oxcsml/magd5198/data",
@@ -351,25 +363,42 @@ if __name__ == "__main__":
             if c == "1":
                 layer_indices.extend(groups[i])
 
+        # perform cross validation
+
         la_sublayer = SublayerKronLaplace(
             model, "classification", layer_indices, backend=AsdlGGN
         )
+        la_sublayer.fit(small_train_loader)
 
-        la_sublayer.fit(train_loader)
-        if not args.prior_precision:
-            la_sublayer.optimize_prior_precision(method="marglik")
-        else:
-            la_sublayer.prior_precision = torch.tensor(args.prior_precision).cuda()
+        prior_precision_sweep = np.logspace(-2, 5, num=125, endpoint=True)
+        holdout_likelihood_sweep = np.zeros_like(prior_precision_sweep)
+        log_marginal_likelihood_sweep = np.zeros_like(prior_precision_sweep)
+
+        for i in range(125):
+            la_sublayer.prior_precision = torch.tensor(prior_precision_sweep[i]).cuda()
+            log_marginal_likelihood_sweep[i] = la_sublayer.log_marginal_likelihood().detach().cpu().numpy()
+            probs = predict(val_loader, la_sublayer, True)
+            _, nll, _, _, _, _ = compute_metrics_from_probs(
+                probs, val_targets
+            )
+            holdout_likelihood_sweep[i] = -nll
+
+        # evaluate
+        best_prior_precision = prior_precision_sweep[np.argmax(holdout_likelihood_sweep)]
+        la_sublayer.fit(full_train_loader)
+        la_sublayer.prior_precision = torch.tensor(best_prior_precision).cuda()
 
         all_res_dict["log_marginal_likelihood"] = la_sublayer.log_marginal_likelihood()
         all_res_dict["prior_precision"] = la_sublayer.prior_precision
+        all_res_dict["prior_precision_sweep"] = prior_precision_sweep.tolist()
+        all_res_dict["log_marginal_likelihood_sweep"] = log_marginal_likelihood_sweep.tolist()
+        all_res_dict["holdout_likelihood_sweep"] = holdout_likelihood_sweep.tolist()
         all_res_dict["test_results"] = generate_results_dict(
             all_dataloaders_dict, la_sublayer, test_targets=test_targets, laplace=True
         )
 
     import pickle
 
-    fname = f"/data/stat-oxcsml/magd5198/subset_laplace/{args.stochastic_groups_str}_s{args.seed}"
-    if args.prior_precision:
-        fname = f"{fname}_p{args.prior_precision}"
+    fname = f"/data/stat-oxcsml/magd5198/subset_laplace/{args.stochastic_groups_str}_s{args.seed}_val"
+
     pickle.dump(all_res_dict, open(f"{fname}.pkl", "wb"))

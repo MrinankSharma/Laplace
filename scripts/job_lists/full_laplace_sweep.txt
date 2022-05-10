@@ -1,0 +1,15 @@
+scripts/sublayer_laplace.py --seed 1 --stochastic_groups_str 11111111 --prior_precision 5.0
+scripts/sublayer_laplace.py --seed 1 --stochastic_groups_str 11111111 --prior_precision 15.0
+scripts/sublayer_laplace.py --seed 1 --stochastic_groups_str 11111111 --prior_precision 25.0
+scripts/sublayer_laplace.py --seed 1 --stochastic_groups_str 11111111 --prior_precision 35.0
+scripts/sublayer_laplace.py --seed 1 --stochastic_groups_str 11111111 --prior_precision 45.0
+scripts/sublayer_laplace.py --seed 2 --stochastic_groups_str 11111111 --prior_precision 5.0
+scripts/sublayer_laplace.py --seed 2 --stochastic_groups_str 11111111 --prior_precision 15.0
+scripts/sublayer_laplace.py --seed 2 --stochastic_groups_str 11111111 --prior_precision 25.0
+scripts/sublayer_laplace.py --seed 2 --stochastic_groups_str 11111111 --prior_precision 35.0
+scripts/sublayer_laplace.py --seed 2 --stochastic_groups_str 11111111 --prior_precision 45.0
+scripts/sublayer_laplace.py --seed 3 --stochastic_groups_str 11111111 --prior_precision 5.0
+scripts/sublayer_laplace.py --seed 3 --stochastic_groups_str 11111111 --prior_precision 15.0
+scripts/sublayer_laplace.py --seed 3 --stochastic_groups_str 11111111 --prior_precision 25.0
+scripts/sublayer_laplace.py --seed 3 --stochastic_groups_str 11111111 --prior_precision 35.0
+scripts/sublayer_laplace.py --seed 3 --stochastic_groups_str 11111111 --prior_precision 45.0
