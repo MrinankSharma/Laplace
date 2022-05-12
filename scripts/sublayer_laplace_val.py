@@ -375,7 +375,7 @@ if __name__ == "__main__":
         log_marginal_likelihood_sweep = np.zeros_like(prior_precision_sweep)
 
         for i in range(125):
-            la_sublayer.prior_precision = torch.tensor(prior_precision_sweep[i]).cuda()
+            la_sublayer.prior_precision = torch.tensor(float(prior_precision_sweep[i])).cuda()
             log_marginal_likelihood_sweep[i] = la_sublayer.log_marginal_likelihood().detach().cpu().numpy()
             probs = predict(val_loader, la_sublayer, True)
             _, nll, _, _, _, _ = compute_metrics_from_probs(
@@ -384,7 +384,7 @@ if __name__ == "__main__":
             holdout_likelihood_sweep[i] = -nll
 
         # evaluate
-        best_prior_precision = prior_precision_sweep[np.argmax(holdout_likelihood_sweep)]
+        best_prior_precision = float(prior_precision_sweep[np.argmax(holdout_likelihood_sweep)])
         la_sublayer.fit(full_train_loader)
         la_sublayer.prior_precision = torch.tensor(best_prior_precision).cuda()
 
