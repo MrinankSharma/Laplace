@@ -255,27 +255,21 @@ if __name__ == "__main__":
         download=True,
         transform=transform,
     )
-    train_loader = torch.utils.data.DataLoader(
+    full_train_loader = torch.utils.data.DataLoader(
         trainset, batch_size=batch_size, shuffle=False, num_workers=4
     )
 
-    testset = torchvision.datasets.CIFAR10(
-        root="/data/stat-oxcsml/magd5198/data",
-        train=False,
-        download=True,
-        transform=transform,
+    small_train_set, val_set = torch.utils.data.random_split(
+        trainset, [45000, 5000], generator=torch.Generator().manual_seed(42)
     )
-    test_loader = torch.utils.data.DataLoader(
-        testset, batch_size=batch_size, shuffle=False, num_workers=4
+    small_train_loader = torch.utils.data.DataLoader(
+        small_train_set, batch_size=batch_size, shuffle=False, num_workers=4
     )
-    test_targets = torch.cat([y for x, y in test_loader], dim=0).numpy()
 
-    _, val_set = torch.utils.data.random_split(
-        testset, [9000, 1000], generator=torch.Generator().manual_seed(42)
-    )
     val_loader = torch.utils.data.DataLoader(
         val_set, batch_size=batch_size, shuffle=False, num_workers=4
     )
+
     val_targets = torch.cat([y for x, y in val_loader], dim=0).numpy()
 
     testset = torchvision.datasets.CIFAR10(
@@ -374,7 +368,7 @@ if __name__ == "__main__":
         la_sublayer = SublayerKronLaplace(
             model, "classification", layer_indices, backend=AsdlGGN
         )
-        la_sublayer.fit(train_loader)
+        la_sublayer.fit(small_train_loader)
 
         prior_precision_sweep = np.logspace(-2, 5, num=125, endpoint=True)
         holdout_likelihood_sweep = np.zeros_like(prior_precision_sweep)
@@ -391,7 +385,7 @@ if __name__ == "__main__":
 
         # evaluate
         best_prior_precision = float(prior_precision_sweep[np.argmax(holdout_likelihood_sweep)])
-        la_sublayer.fit(train_loader)
+        la_sublayer.fit(full_train_loader)
         la_sublayer.prior_precision = torch.tensor(best_prior_precision).cuda()
 
         all_res_dict["log_marginal_likelihood"] = la_sublayer.log_marginal_likelihood()
@@ -405,6 +399,6 @@ if __name__ == "__main__":
 
     import pickle
 
-    fname = f"/data/stat-oxcsml/magd5198/subset_laplace/{args.stochastic_groups_str}_s{args.seed}_val_new"
+    fname = f"/data/stat-oxcsml/magd5198/subset_laplace/{args.stochastic_groups_str}_s{args.seed}_val"
 
     pickle.dump(all_res_dict, open(f"{fname}.pkl", "wb"))
