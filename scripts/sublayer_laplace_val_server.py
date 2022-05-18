@@ -250,7 +250,7 @@ if __name__ == "__main__":
     batch_size = 128
 
     trainset = torchvision.datasets.CIFAR10(
-        root="~/data",
+        root="/home/user/data",
         train=True,
         download=True,
         transform=transform,
@@ -260,7 +260,7 @@ if __name__ == "__main__":
     )
 
     testset = torchvision.datasets.CIFAR10(
-        root="~/data",
+        root="/home/user/data",
         train=False,
         download=True,
         transform=transform,
@@ -303,11 +303,11 @@ if __name__ == "__main__":
     ]
     corrupted_dataloaders_dict = {}
 
-    np_y = np.load(f"~/data/CIFAR-10-C/labels.npy").astype(
+    np_y = np.load(f"/home/user/data/CIFAR-10-C/labels.npy").astype(
         np.int64
     )
     for c in corruptions:
-        data_file = f"~/data/CIFAR-10-C/{c}.npy"
+        data_file = f"/home/user/data/CIFAR-10-C/{c}.npy"
         np_x = np.load(data_file)
 
         dataset = DatafeedImage(np_x, np_y, transform)
@@ -330,7 +330,7 @@ if __name__ == "__main__":
     model = FixupWideResNet(16, 4, 10, dropRate=0.3).cuda()
     model.load_state_dict(
         torch.load(
-            f"~/checkpoints/seed{args.seed}.pt",
+            f"/home/user/checkpoints/seed{args.seed}.pt",
             map_location="cuda:0",
         )["model_state_dict"]
     )
@@ -396,6 +396,6 @@ if __name__ == "__main__":
 
     import pickle
 
-    fname = f"~/subset_laplace/{args.stochastic_groups_str}_s{args.seed}_val_new"
+    fname = f"/home/user/subset_laplace/{args.stochastic_groups_str}_s{args.seed}_val_new"
 
     pickle.dump(all_res_dict, open(f"{fname}.pkl", "wb"))
