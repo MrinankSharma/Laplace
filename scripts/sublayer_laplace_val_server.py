@@ -247,7 +247,7 @@ if __name__ == "__main__":
         ]
     )
 
-    batch_size = 128
+    batch_size = 64
 
     trainset = torchvision.datasets.CIFAR10(
         root="/home/user/data",
@@ -361,11 +361,13 @@ if __name__ == "__main__":
                 layer_indices.extend(groups[i])
 
         # perform cross validation
-
+        print("fitting laplace")
         la_sublayer = SublayerKronLaplace(
             model, "classification", layer_indices, backend=AsdlGGN
         )
         la_sublayer.fit(train_loader)
+
+        print("starting validation")
 
         prior_precision_sweep = np.logspace(-2, 5, num=125, endpoint=True)
         holdout_likelihood_sweep = np.zeros_like(prior_precision_sweep)
